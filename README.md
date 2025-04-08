@@ -10,6 +10,24 @@ Transformation of a batch of data $X \sim \mathcal{N}({\mu}, {\Sigma})$  using d
 ![](figs/NormalOSTQuant.png)
 Fig2 : The overall flow diagram of OSTQuant. The top section of the figure illustrates how the global orthogonal transformation, $R_{res}$, along with the two scaling transformations, $S_{attn}$ and $S_{ffn}$, collaborate within each block to adjust the distributions across the entire network while maintaining computational invariance. The bottom section highlights four equivalent transformation pairs applied to the FFN and Self-Attention layers. Each fully-connected (FC) layer’s activation and weight are influenced by one or more of these transformation pairs. During runtime, these transformation pairs are fused with the weights, ensuring minimal runtime overhead.
 
+## Evaluate from ours optimized transformation matrix weights
+We have provided the optimized transformation matrix weights in [google drive](https://drive.google.com/drive/folders/10kFP3G-qdDvpPik9F9jy49c3yQbGFG6N?usp=sharing).
+
+You can choose to load the checkpoints we provide to evaluate directly.
+```sh
+python main.py --output_dir output/llama2_w4a16kv16 --model weights/Llama-2-7b-hf  \
+ --loss_type=kl_top --post_attn=True \
+ --rotate_ov=True --rotate_post_rope=False --online_qk_hadamard=False --smooth_qk=True --smooth_ov=True --smooth_up_down=True --smooth_norm_linear=True --bf16=True --lm_eval=True --per_device_train_batch_size=4 \
+ --max_steps=100 --a_bits=16 --v_bits=16 --k_bits=16 --down_bits=16 --w_clip=True\
+ --train_enable_wquant=True --sub_mean False --train_rotate=False --resume_path=checkpoints/llama2_7b_w4a16kv16.bin
+```
+
+## Reproduce from scratch
+You can repdoduce our results with the following command:
+```python
+export CUDA_VISIBLE_DEVICES="0,1,2,3"
+sh scripts/w4a16kv16.sh
+```
 ## Main Results
 
 #### Table：Comparison of perplexity on WikiText2 and averaged accuracy on nine Zero-Shot tasks. Results for SmoothQuant, GPTQ, OmniQuant, AWQ, and QuaRot are based on official code and SpinQuant's results for LLaMA-2/3 using official weights, with LLaMA-1 from the official code.
@@ -41,12 +59,6 @@ Fig2 : The overall flow diagram of OSTQuant. The top section of the figure illus
 |              | SpinQuant    | 64.10       | 7.35     | 62.01       | 5.96     | 64.13       | 5.74     | 61.32       | 6.12     | 64.95       | **5.39** | 68.14       | 4.55     |
 |              | **OSTQuant** | **65.37**   | **7.29** | **63.18**   | **5.91** | **65.41**   | **5.25** | **62.55**   | **6.07** | **65.43**   | 5.40     | **68.20**   | **4.42** |
 
-## Optimize and Evaluate
-You can repdoduce our results with the following command:
-```python
-export CUDA_VISIBLE_DEVICES="0,1,2,3"
-sh scripts/w4a16kv16.sh
-```
 
 ## Contributing
 We welcome contributions from the research and development community! Whether you're interested in improving the existing features, adding new functionalities, or reporting issues, your input is invaluable.

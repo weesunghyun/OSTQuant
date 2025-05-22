@@ -47,6 +47,7 @@ def rotate_smooth_train(args, lm: LM):
     trainer = MyTrainer(
         model=lm.model,
         tokenizer=lm.tokenizer,
+        pretrained_model=lm.pretrained_model,
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
         

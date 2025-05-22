@@ -173,7 +173,8 @@ def parse_args():
 class TrainingArguments(transformers.TrainingArguments):
     
     
-    model: str = field(default="weights/llama3-8b-hf", metadata=dict(help="Path to the model"))
+    model: str = field(default="meta-llama/Meta-Llama-3-8B-Instruct", metadata=dict(help="Path to the model"))
+    pretrained_model: str = field(default="meta-llama/Meta-Llama-3-8B", metadata=dict(help="Path to the pretrain model"))
     fully_quant: bool = field(default=False, metadata=dict(help="Whether to use fully quantization"))
     test_static: bool = field(default=False, metadata=dict(help="Whether to use static quantization for activation"))
     use_sdpa: bool = field(default=True, metadata=dict(help="Use SDPA instead of default MHA"))
@@ -198,10 +199,24 @@ class TrainingArguments(transformers.TrainingArguments):
                 "kl_top_50",
                 "kl_top_100",
                 "kl_top_500",
+                "contrastive_kl",
+                "contrastive_kl_top",
+                "contrastive_kl_top_5",
+                "contrastive_kl_top_10",
+                "contrastive_kl_top_50",
+                "contrastive_kl_top_100",
+                "contrastive_kl_top_500",
+                "contrastive_kl_exp0",
+                "contrastive_kl_exp0_5",
+                "contrastive_kl_exp0_10",
+                "contrastive_kl_exp0_50",
+                "contrastive_kl_exp0_100",
+                "contrastive_kl_exp0_500",
             ],
             help="Loss type for training",
         ),
     )
+    contrastive_loss_weight: float = field(default=0.1, metadata=dict(help="Contrastive loss weight"))
     opt_type: str = field(default="RAdam", metadata=dict(choices=["SGDG", "RAdam", "RSGD"], help="Optimizer type for training"))
     rotate_lr: float = field(default=0.01689753172873217, metadata=dict(help="Learning rate for rotation"))
     smooth_lr: float = field(default=0.0017898822675917248, metadata=dict(help="Learning rate for smoothing"))
@@ -284,16 +299,27 @@ class TrainingArguments(transformers.TrainingArguments):
     bsz: int = field(default=4, metadata=dict(help="Batch size for evaluation"))
     lm_eval: bool = field(default=False, metadata=dict(help="Evaluate the model on LM Eval tasks"))
     tasks: List[str] = field(
+        # default_factory=lambda: [
+        #     "arc_challenge",
+        #     "arc_easy",
+        #     "boolq",
+        #     "hellaswag",
+        #     "lambada_openai",
+        #     "openbookqa",
+        #     "piqa",
+        #     "social_iqa",
+        #     "winogrande",
+        # ],
         default_factory=lambda: [
-            "arc_challenge",
-            "arc_easy",
-            "boolq",
-            "hellaswag",
-            "lambada_openai",
-            "openbookqa",
-            "piqa",
-            "social_iqa",
-            "winogrande",
+            # "truthfulqa",
+            # "truthfulqa_gen",
+            "truthfulqa_mc2",
+            "toxigen",
+            "advanced_ai_risk",
+            "bigbench_hhh_alignment_multiple_choice",
+            "bigbench_suicide_risk_multiple_choice",
+            "moral_stories",
+            # "mmlu",
         ],
         metadata=dict(help="List of LM Eval tasks"),
     )

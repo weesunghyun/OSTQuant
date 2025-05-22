@@ -84,6 +84,23 @@ def get_model(
         tokenizer = transformers.LlamaTokenizerFast.from_pretrained(model_name,use_fact=True,add_eos_token=False,add_bos_token=False,padding_side="right")
         
     
+    # Load pretrained model if specified
+    if hasattr(args, 'pretrained_model') and args.pretrained_model:
+        pretrained_config = transformers.LlamaConfig.from_pretrained(args.pretrained_model)
+        pretrained_config._attn_implementation = "sdpa" if args.use_sdpa else "eager"
+        pretrained_model = transformers.LlamaForCausalLM.from_pretrained(
+            args.pretrained_model,
+            torch_dtype=dtype,
+            device_map="cpu",
+            use_auth_token=hf_token,
+            low_cpu_mem_usage=True,
+            config=pretrained_config,
+        )
+        pretrained_model.seqlen = 2048
+        print(f"pretrained_model: {args.pretrained_model}")
+    else:
+        pretrained_model = None
+
     if args.qwen2_downfill:
         for name,module in model.named_modules():
             if 'down_proj' in name and isinstance(module, torch.nn.Linear):
@@ -111,14 +128,16 @@ def get_model(
     model.lm_head = QuantLinear(model.lm_head,dict(bits=32), name="head") 
     utils.cleanup_memory(False)
     
-    return model,tokenizer
+    # return model,tokenizer
+    return model,tokenizer,pretrained_model
 
 class LM:
     model:LlamaForCausalLM
     def __init__(self,args):
         self.args = args
         self.model_name = args.model 
-        self.model,self.tokenizer = get_model(self.model_name,args)
+        # self.model,self.tokenizer = get_model(self.model_name,args)
+        self.model,self.tokenizer,self.pretrained_model = get_model(self.model_name,args)
         self.seqlen = 2048
         self.calibrated = False 
 

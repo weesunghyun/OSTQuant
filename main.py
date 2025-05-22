@@ -18,6 +18,8 @@ def main(args):
         pre_ppl = eval_utils.evaluator(lm.model,test_loader,utils.DEV,args,),
         logger.info(f"Float ppl:{pre_ppl}")
         eval_tasks(lm,args)
+        exit()
+    
     if args.rotate:
         lm.fuse_layer_norms()
         lm.generate_rotate_parameters()
@@ -89,21 +91,32 @@ def eval_tasks(lm,args):
     else:
         lm.model.to(utils.DEV)
     task_manager = TaskManager()
+    # print(f"task_manager.all_tasks: {task_manager.all_tasks}")
     tasks = task_manager.match_tasks(args.tasks)
+    # print(f"tasks: {tasks}")
     hflm = HFLM(pretrained=lm.model, tokenizer=lm.tokenizer,batch_size="auto",max_batch_size=256)
     results = lm_eval.simple_evaluate(hflm,tasks=tasks,batch_size="auto",max_batch_size=256)
-    metric_vals = {task: round(result.get('acc_norm,none', result['acc,none']), 4) for task, result in results['results'].items()}
-    mean_acc_val = round(sum(metric_vals.values()) / len(metric_vals.values()), 4)
-    std_vals = {task: round(result.get('acc_norm_stderr,none', result['acc_stderr,none']), 4) for task, result in results['results'].items()}
-    mean_std_val =round(sum(std_vals.values()) / len(std_vals.values()), 4) 
-    metric_vals['acc_avg'] = mean_acc_val
-    results['results']['AVERAGE'] = {
-        "acc,none":mean_acc_val,
-        "acc_stderr,none":mean_std_val
-    }
-    logger.info("\n" + make_table(results))
-
-
+    # print(results)
+    # breakpoint()
+    # logger.info("\n" + results)
+    metric_vals = {}
+    for task, result in results['results'].items():
+        if 'acc,none' in result:
+            metric_vals[task] = round(result.get('acc_norm,none', result['acc,none']), 4)
+    
+    if metric_vals:
+        mean_acc_val = round(sum(metric_vals.values()) / len(metric_vals.values()), 4)
+        std_vals = {}
+        for task, result in results['results'].items():
+            if 'acc,none' in result:
+                std_vals[task] = round(result.get('acc_norm_stderr,none', result['acc_stderr,none']), 4)
+        mean_std_val = round(sum(std_vals.values()) / len(std_vals.values()), 4)
+        metric_vals['acc_avg'] = mean_acc_val
+        results['results']['AVERAGE'] = {
+            "acc,none": mean_acc_val,
+            "acc_stderr,none": mean_std_val
+        }
+        logger.info("\n" + make_table(results))
 
 
 def dynamic_eval(lm:ost_model_utils.LM,dataloader,args,use_act_quant=True,use_fully_quant=False,use_weight_quant=False):

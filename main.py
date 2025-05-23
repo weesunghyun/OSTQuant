@@ -18,8 +18,8 @@ def main(args):
     lm.model.eval()
     test_loader = data_utils.get_loaders(args.eval_dataset,seed=args.seed,model=args.model,seqlen=lm.seqlen,eval_mode=True)  
     if args.pre_eval:
-        # pre_ppl = eval_utils.evaluator(lm.model,test_loader,utils.DEV,args,),
-        # logger.info(f"Float ppl:{pre_ppl}")
+        pre_ppl = eval_utils.evaluator(lm.model,test_loader,utils.DEV,args,),
+        logger.info(f"Float ppl:{pre_ppl}")
         eval_tasks(lm,args)
         exit()
     

@@ -136,21 +136,25 @@ class QuantAttention(nn.Module):
 
         query_states = query_states.view(
             bsz, q_len, self.num_heads, self.head_dim
-        )  
-        key_states = key_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim)  
+        ).transpose(1, 2)
+        key_states = key_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim).transpose(1, 2)  
         value_states = value_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim).transpose(
             1, 2
         )  
         cos, sin = self.rotary_emb(value_states, position_ids)
         
-        rotary_matrix = build_rotary_matrix(cos, sin).to(query_states.device)
+        # rotary_matrix = build_rotary_matrix(cos, sin).to(query_states.device)
 
-        pre_rope_Q = self.pre_rope_Q.weight if self.pre_rope_Q is not None else None
-        post_rope_Q = self.post_rope_Q.weight if self.post_rope_Q is not None else None
-        key_states = self.ropek(key_states, rotary_matrix, pre_rope_Q, post_rope_Q).transpose(
-            1, 2
-        )  
-        query_states = self.ropeq(query_states, rotary_matrix, pre_rope_Q, post_rope_Q).transpose(1, 2)
+        # pre_rope_Q = self.pre_rope_Q.weight if self.pre_rope_Q is not None else None
+        # post_rope_Q = self.post_rope_Q.weight if self.post_rope_Q is not None else None
+        # key_states = self.ropek(key_states, rotary_matrix, pre_rope_Q, post_rope_Q).transpose(
+        #     1, 2
+        # )  
+        # query_states = self.ropeq(query_states, rotary_matrix, pre_rope_Q, post_rope_Q).transpose(1, 2)
+
+        query_states, key_states = apply_rotary_pos_emb(
+            query_states, key_states, cos, sin
+        )
 
         past_key_value = getattr(self, "past_key_value", past_key_value)
         if past_key_value is not None:

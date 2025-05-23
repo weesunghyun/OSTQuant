@@ -266,8 +266,8 @@ def eval_safetybench(lm,args):
 
     # 5. Generate & score
     for entry in tqdm.tqdm(results, desc="Generating"):
-        if entry['res'] is not None:
-            continue  # already done
+        # if entry['res'] is not None:
+        #     continue  # already done
 
         # Build the prompt
         prompt = prompt_map[entry['id']]   # 미리 만든 문자열

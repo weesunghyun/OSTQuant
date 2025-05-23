@@ -2,6 +2,8 @@ import os,utils,lm_eval,logging
 import quant._get_args as get_args
 import quant.ost_model_utils as ost_model_utils,utils.data_utils as data_utils,utils.eval_utils as eval_utils,utils.gptq_utils as gptq_utils
 import torch,torch.nn as nn,torch.nn.functional as F,transformers,sys,datetime,datasets,lm_eval,lm_eval.tasks,accelerate
+import json
+import tqdm
 from loguru import logger
 from quant.ost_train import rotate_smooth_train
 from lm_eval.tasks import TaskManager
@@ -119,8 +121,6 @@ def eval_tasks(lm,args):
         logger.info("\n" + make_table(results))
 
     # from lm_eval.api.instance import Instance
-    # import json
-    # import tqdm
     # data_path = "/home/project/safety/TrustLLM/dataset/safety/jailbreak.json"
     # save_path = "safety/jailbreak_res.json"
     # with open(data_path) as f:
@@ -191,8 +191,6 @@ def eval_safetybench(lm,args):
             f"[/INST]</s>"
         )
 
-    import json
-    import tqdm
     data_path = "SafetyBench/test_en.json"
     shot_path = "SafetyBench/dev_en.json"
     save_path = "eval_res/safetybench/res_llama3_8b_zeroshot.json"

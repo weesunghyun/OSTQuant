@@ -326,6 +326,14 @@ class TrainingArguments(transformers.TrainingArguments):
     lm_eval_batch_size: int = field(default=16, metadata=dict(help="Batch size for evaluating with LM Eval harness"))
     distribute: bool = field(default=False, metadata=dict(help="Distribute the model on multiple GPUs for evaluation"))
 
+    safetybench_data_path: str = field(default="SafetyBench/test_en.json", metadata=dict(help="Path to the safetybench data"))
+    safetybench_shot_path: str = field(default="SafetyBench/dev_en.json", metadata=dict(help="Path to the safetybench shot"))
+    safetybench_zero_shot: bool = field(default=True, metadata=dict(help="Whether to use zero-shot for safetybench"))
+    safetybench_use_instruct: bool = field(default=False, metadata=dict(help="Whether to use instruct for safetybench"))
+
+    safetybench_save_path: str = field(default="eval_res/safetybench/results.json", metadata=dict(help="Path to save the safetybench results"))
+
+
     pre_eval: bool = field(default=False, metadata=dict(help="Whether to evaluate the model before training"))
     
     qwen2_downfill: bool = field(default=False, metadata=dict(help="Whether to fill the down projection with zeros"))

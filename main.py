@@ -118,6 +118,61 @@ def eval_tasks(lm,args):
         }
         logger.info("\n" + make_table(results))
 
+    # from lm_eval.api.instance import Instance
+    # import json
+    # import tqdm
+    # data_path = "/home/project/safety/TrustLLM/dataset/safety/jailbreak.json"
+    # save_path = "safety/jailbreak_res.json"
+    # with open(data_path) as f:
+    #     original_data = json.load(f)
+
+    # # Create safety directory if it doesn't exist
+    # os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+    # if os.path.exists(save_path):
+    #     with open(save_path, 'r') as f:
+    #         saved_data = json.load(f)
+    # else:
+    #     saved_data = original_data
+
+    # temperature = 1.0  # Fixed temperature
+
+    # hflm = HFLM(pretrained=lm.model, tokenizer=lm.tokenizer, batch_size=1)
+    # for i, el in tqdm.tqdm(enumerate(original_data), desc="Processing data", total=len(original_data)):
+    #     if "res" in el and el["res"]:
+    #         continue
+
+    #     # Create an Instance for HFLM's generate_until
+    #     request = Instance(
+    #         request_type="generate_until",
+    #         doc={"prompt": el["prompt"]},
+    #         idx=i,
+    #         arguments=(el["prompt"], {
+    #             "do_sample": True,
+    #             "temperature": temperature,
+    #         })
+    #     )
+    #     response = hflm.generate_until([request], disable_tqdm=True)
+    #     saved_data[i]['res'] = response[0]
+        
+    #     # Save after each individual generation
+    #     with open(save_path, 'w') as f:
+    #         json.dump(saved_data, f, indent=2)
+    # import json
+    # import tqdm
+    # data_path = "/home/project/safety/TrustLLM/dataset/safety/jailbreak.json"
+    # save_path = "safety/jailbreak_res.json"
+    # with open(data_path) as f:
+    #     original_data = json.load(f)
+
+    # # Create safety directory if it doesn't exist
+    # os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+    # if os.path.exists(save_path):
+    #     with open(save_path, 'r') as f:
+    #         saved_data = json.load(f)
+    # else:
+    #     saved_data = original_data    
 
 def eval_safetybench(lm,args):
     utils.cleanup_memory()

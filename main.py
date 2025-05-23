@@ -9,6 +9,7 @@ from quant.ost_train import rotate_smooth_train
 from lm_eval.tasks import TaskManager
 from lm_eval.utils import make_table
 from lm_eval.models.huggingface import HFLM,eval_logger
+from lm_eval.api.instance import Instance
 eval_logger.level = logging.ERROR
 
 def main(args):
@@ -120,7 +121,6 @@ def eval_tasks(lm,args):
         }
         logger.info("\n" + make_table(results))
 
-    # from lm_eval.api.instance import Instance
     # data_path = "/home/project/safety/TrustLLM/dataset/safety/jailbreak.json"
     # save_path = "safety/jailbreak_res.json"
     # with open(data_path) as f:
@@ -191,19 +191,12 @@ def eval_safetybench(lm,args):
             f"[/INST]</s>"
         )
 
-    data_path = "SafetyBench/test_en.json"
-    shot_path = "SafetyBench/dev_en.json"
-    save_path = "eval_res/safetybench/res_llama3_8b_zeroshot.json"
-
-    zero_shot = True
-    use_instruct = False
-
     # 1. Load SafetyBench data
-    with open(data_path, 'r') as f:
+    with open(args.safetybench_data_path, 'r') as f:
         data = json.load(f)
 
-    if not zero_shot:
-        with open(shot_path, 'r') as f:
+    if not args.safetybench_zero_shot:
+        with open(args.safetybench_shot_path, 'r') as f:
             shot_data = json.load(f)
 
     # 1. entry별 프롬프트 맵 생성
@@ -213,7 +206,7 @@ def eval_safetybench(lm,args):
         opts = item['options']
         option_str = "\n".join(f"({chr(65+i)}) {opt}" for i,opt in enumerate(opts))
         
-        if zero_shot:
+        if args.safetybench_zero_shot:
             plain = (
                 f"Question: {q}\n"
                 "Options:\n" + option_str + "\nAnswer:"
@@ -237,7 +230,7 @@ def eval_safetybench(lm,args):
                 f"Question: {q}\n"
                 "Options:\n" + option_str + "\nAnswer:"
             )
-        if use_instruct:
+        if args.safetybench_use_instruct:
             # llama3 instruct 래핑
             wrapped = wrap_llama3_instruct(plain)
             prompt_map[item['id']] = wrapped
@@ -245,12 +238,12 @@ def eval_safetybench(lm,args):
             prompt_map[item['id']] = plain
 
     # 2. Ensure output folder exists
-    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+    os.makedirs(os.path.dirname(args.safetybench_save_path), exist_ok=True)
 
     # 3. Initialize or load existing results
-    if os.path.exists(save_path):
+    if os.path.exists(args.safetybench_save_path):
         # load existing id→pred map and rebuild a results list
-        existing = json.load(open(save_path))
+        existing = json.load(open(args.safetybench_save_path))
         results = []
         for item in data:
             results.append({
@@ -303,7 +296,7 @@ def eval_safetybench(lm,args):
             for d in sorted(results, key=lambda x: x['id'])
             if d['res'] is not None
         }
-        with open(save_path, 'w') as f:
+        with open(args.safetybench_save_path, 'w') as f:
             json.dump(submission, f, indent=2)
             
 

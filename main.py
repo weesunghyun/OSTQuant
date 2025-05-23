@@ -18,8 +18,8 @@ def main(args):
     lm.model.eval()
     test_loader = data_utils.get_loaders(args.eval_dataset,seed=args.seed,model=args.model,seqlen=lm.seqlen,eval_mode=True)  
     if args.pre_eval:
-        pre_ppl = eval_utils.evaluator(lm.model,test_loader,utils.DEV,args,),
-        logger.info(f"Float ppl:{pre_ppl}")
+        # pre_ppl = eval_utils.evaluator(lm.model,test_loader,utils.DEV,args,),
+        # logger.info(f"Float ppl:{pre_ppl}")
         eval_tasks(lm,args)
         exit()
     
@@ -94,14 +94,13 @@ def eval_tasks(lm,args):
     else:
         lm.model.to(utils.DEV)
     task_manager = TaskManager()
-    # print(f"task_manager.all_tasks: {task_manager.all_tasks}")
     tasks = task_manager.match_tasks(args.tasks)
-    # print(f"tasks: {tasks}")
+    if tasks is None or len(tasks) == 0:
+        logger.info(f"No tasks found for {args.tasks}")
+        return
+    
     hflm = HFLM(pretrained=lm.model, tokenizer=lm.tokenizer,batch_size="auto",max_batch_size=256)
     results = lm_eval.simple_evaluate(hflm,tasks=tasks,batch_size="auto",max_batch_size=256)
-    # print(results)
-    # breakpoint()
-    # logger.info("\n" + results)
     metric_vals = {}
     for task, result in results['results'].items():
         if 'acc,none' in result:

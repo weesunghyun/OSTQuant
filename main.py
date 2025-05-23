@@ -21,6 +21,7 @@ def main(args):
         pre_ppl = eval_utils.evaluator(lm.model,test_loader,utils.DEV,args,),
         logger.info(f"Float ppl:{pre_ppl}")
         eval_tasks(lm,args)
+        eval_safetybench(lm,args)
         exit()
     
     if args.rotate:
@@ -85,7 +86,7 @@ def main(args):
         return
     else:
         eval_tasks(lm,args)
-
+        eval_safetybench(lm,args)
 
 def eval_tasks(lm,args):
     utils.cleanup_memory()
@@ -237,12 +238,13 @@ def eval_safetybench(lm,args):
             prompt_map[item['id']] = plain
 
     # 2. Ensure output folder exists
-    os.makedirs(os.path.dirname(args.safetybench_save_path), exist_ok=True)
+    save_path = args.safetybench_save_path
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
     # 3. Initialize or load existing results
-    if os.path.exists(args.safetybench_save_path):
+    if os.path.exists(save_path):
         # load existing id→pred map and rebuild a results list
-        existing = json.load(open(args.safetybench_save_path))
+        existing = json.load(open(save_path))
         results = []
         for item in data:
             results.append({
@@ -295,8 +297,10 @@ def eval_safetybench(lm,args):
             for d in sorted(results, key=lambda x: x['id'])
             if d['res'] is not None
         }
-        with open(args.safetybench_save_path, 'w') as f:
+        with open(save_path, 'w') as f:
             json.dump(submission, f, indent=2)
+    
+    logger.info(f"SafetyBench results saved to {save_path}")
             
 
 def dynamic_eval(lm:ost_model_utils.LM,dataloader,args,use_act_quant=True,use_fully_quant=False,use_weight_quant=False):

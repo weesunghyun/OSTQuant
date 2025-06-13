@@ -39,10 +39,10 @@ pip install -r requirements.txt
 ## Citation
 If you find OSTQuant useful in your research, please consider citing our paper:
 ```bibtex
-@misc{wee2024aaq,
+@misc{wee2025aaq,
   title={Alignment-Aware Quantization for LLM Safety},
   author={Sunghyun Wee and Juhwan Cho and Seoyeon Park and Nojun Kwak},
-  year={2024},
+  year={2025},
   note={arXiv:xxxx.xxxxx},
   url={https://github.com/weesunghyun/AAQ}
 }
